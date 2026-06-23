@@ -9,8 +9,22 @@ node_modules/
 
 # PWA (빌드 시 자동 생성)
 public/sw.js
+public/swe-worker-*.js
 public/workbox-*.js
 public/worker-*.js
+
+# 빌드 캐시
+tsconfig.tsbuildinfo
+
+# 원본 데이터 / 변환 스크립트
+data/
+*.py
+*.pdf
+Tempmarine_test.json
+
+# 중간 가공 이미지
+public/icons/species/crops/
+public/icons/species/Gemini_Generated_Image_*
 
 # OS
 .DS_Store
