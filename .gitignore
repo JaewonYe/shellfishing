@@ -26,6 +26,9 @@ Tempmarine_test.json
 public/icons/species/crops/
 public/icons/species/Gemini_Generated_Image_*
 
+# 루트 중복 GeoJSON (public/에 동일 파일 존재)
+/fishfarms.geojson
+
 # OS
 .DS_Store
 Thumbs.db
