@@ -1,0 +1,17 @@
+# Next.js
+.next/
+out/
+node_modules/
+
+# env
+.env.local
+.env*.local
+
+# PWA (빌드 시 자동 생성)
+public/sw.js
+public/workbox-*.js
+public/worker-*.js
+
+# OS
+.DS_Store
+Thumbs.db
