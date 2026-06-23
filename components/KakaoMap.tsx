@@ -148,7 +148,7 @@ function toLatLngPaths(geometry: any): { lat: number; lng: number }[][] {
 function polygonStyle(feature: any, isSelected: boolean, isHovered: boolean) {
   const expired = isExpired(feature.properties?.period ?? '');
   const strokeColor = expired ? STROKE_EXPIRED : STROKE_NORMAL;
-  const strokeStyle: kakao.maps.StrokeStyles = expired ? 'shortdash' : 'solid';
+  const strokeStyle = expired ? 'shortdash' : 'solid';
   if (isSelected) {
     return { fillColor: FILL_SELECTED, fillOpacity: 0.55, strokeColor, strokeStyle, strokeWeight: 3 };
   }
