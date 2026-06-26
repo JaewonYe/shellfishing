@@ -2,13 +2,13 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: '해루질 맵',
-  description: '마을어장 정보를 지도에서 확인하는 해루질 도우미 앱',
+  title: '공유해',
+  description: '해루질·낚시 등 바다 레저에 필요한 정보를 공유하는 앱',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: '해루질맵',
+    title: '공유해',
   },
   icons: {
     apple: '/icons/icon-192.png',
