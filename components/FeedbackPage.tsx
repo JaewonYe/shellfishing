@@ -3,10 +3,10 @@
 import { useCallback, useEffect, useState } from 'react';
 
 interface FeedbackItem {
-  id: string;
+  id: number | string;
   category: string;
   content: string;
-  createdAt: string;
+  created_at: string;
 }
 
 const CATEGORIES = [
@@ -18,7 +18,7 @@ const CATEGORIES = [
 
 const STORAGE_KEY = 'gongyuhae_feedback';
 
-function loadFeedback(): FeedbackItem[] {
+function loadLocal(): FeedbackItem[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : [];
@@ -27,7 +27,7 @@ function loadFeedback(): FeedbackItem[] {
   }
 }
 
-function saveFeedback(items: FeedbackItem[]) {
+function saveLocal(items: FeedbackItem[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
 }
 
@@ -36,35 +36,69 @@ export default function FeedbackPage() {
   const [category, setCategory] = useState('feature');
   const [content, setContent] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [useApi, setUseApi] = useState(false);
 
   useEffect(() => {
-    setItems(loadFeedback());
+    fetch('/api/feedback')
+      .then(r => r.json())
+      .then(data => {
+        if (data.source === 'no-db') {
+          setItems(loadLocal());
+        } else {
+          setItems(data.items ?? []);
+          setUseApi(true);
+        }
+      })
+      .catch(() => {
+        setItems(loadLocal());
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
     const text = content.trim();
     if (!text) return;
 
-    const item: FeedbackItem = {
-      id: Date.now().toString(36),
-      category,
-      content: text,
-      createdAt: new Date().toISOString(),
-    };
+    if (useApi) {
+      try {
+        const res = await fetch('/api/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ category, content: text }),
+        });
+        if (res.ok) {
+          const item = await res.json();
+          setItems(prev => [item, ...prev]);
+        }
+      } catch { /* 폴백 없이 실패 */ }
+    } else {
+      const item: FeedbackItem = {
+        id: Date.now().toString(36),
+        category,
+        content: text,
+        created_at: new Date().toISOString(),
+      };
+      const updated = [item, ...items];
+      setItems(updated);
+      saveLocal(updated);
+    }
 
-    const updated = [item, ...items];
-    setItems(updated);
-    saveFeedback(updated);
     setContent('');
     setSubmitted(true);
     setTimeout(() => setSubmitted(false), 2500);
-  }, [category, content, items]);
+  }, [category, content, items, useApi]);
 
-  const handleDelete = useCallback((id: string) => {
+  const handleDelete = useCallback(async (id: number | string) => {
+    if (useApi) {
+      try {
+        await fetch(`/api/feedback?id=${id}`, { method: 'DELETE' });
+      } catch { /* ignore */ }
+    }
     const updated = items.filter(i => i.id !== id);
     setItems(updated);
-    saveFeedback(updated);
-  }, [items]);
+    if (!useApi) saveLocal(updated);
+  }, [items, useApi]);
 
   const categoryLabel = (value: string) =>
     CATEGORIES.find(c => c.value === value)?.label ?? value;
@@ -133,7 +167,9 @@ export default function FeedbackPage() {
         </section>
 
         {/* 등록된 요청 목록 */}
-        {items.length > 0 && (
+        {loading ? (
+          <p className="text-center text-sm text-gray-400 py-8">불러오는 중...</p>
+        ) : items.length > 0 && (
           <section className="bg-white rounded-2xl p-5 shadow-sm">
             <h3 className="text-sm font-bold text-gray-800 mb-4">
               등록된 요청 <span className="text-gray-400 font-normal">({items.length})</span>
@@ -147,7 +183,7 @@ export default function FeedbackPage() {
                       {categoryLabel(item.category)}
                     </span>
                     <div className="flex items-center gap-2">
-                      <span className="text-[11px] text-gray-300">{formatDate(item.createdAt)}</span>
+                      <span className="text-[11px] text-gray-300">{formatDate(item.created_at)}</span>
                       <button
                         onClick={() => handleDelete(item.id)}
                         className="text-gray-300 hover:text-red-400 text-xs"
