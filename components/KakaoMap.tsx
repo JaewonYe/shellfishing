@@ -18,6 +18,21 @@ import {
   useKakaoLoader,
 } from 'react-kakao-maps-sdk';
 
+// ── 어종 아이콘 파일명 매핑 (한글 → ASCII) ──
+const SPECIES_FILE: Record<string, string> = {
+  가리맛: 'garimat', 가리비: 'garibi', 가무락: 'gamurak', 가시파래: 'gasiparae',
+  개불: 'gaebul', 개조개: 'gaejogae', 갯지렁이: 'gaetjireongyi', 게: 'ge',
+  고둥: 'godung', 고막: 'gomak', 골뱅이: 'golbaengi', 굴: 'gul',
+  기조개: 'gijogae', 꼬막: 'kkomak', 낙지: 'nakji', 다시마: 'dasima',
+  대합: 'daehap', 돌김: 'dolgim', 동죽: 'dongjuk', 떡조개: 'tteokjogae',
+  멸치: 'myeolchi', 문어: 'muneo', 미역: 'miyeok', 바지락: 'bajirak',
+  백합: 'baekhap', 백합2: 'baekhap2', 비단조개: 'bidanjogae', 비합: 'bihap',
+  새고막: 'saegomak', 새조개: 'saejogae', 새조개2: 'saejogae2', 성게: 'seongge',
+  소라: 'sora', 우렁쉥이: 'ureongswengi', 우묵가사리: 'umukgasari', 전복: 'jeonbok',
+  짱뚱어: 'jjangttungeo', 참맛: 'chammat', 천초: 'cheoncho', 키조개: 'kijogae',
+  파래: 'parae', 피조개: 'pijogae', 해삼: 'haesam', 홍합: 'honghap',
+};
+
 // ── 타입 ──────────────────────────────────────────
 export interface FarmProperties {
   id: string;
@@ -182,7 +197,7 @@ function SpeciesIconBadge({ icons, onSelect }: { icons: string[]; onSelect: () =
       {icons.map((name) => (
         <img
           key={name}
-          src={`/icons/species/${encodeURIComponent(name)}.svg`}
+          src={`/icons/species/${SPECIES_FILE[name] ?? name}.svg`}
           width={iconSize}
           height={iconSize}
           title={name}
