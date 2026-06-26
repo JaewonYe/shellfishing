@@ -7,8 +7,8 @@ import SearchBar from '@/components/SearchBar';
 import TideLayer from '@/components/TideLayer';
 import { TideStationInfo } from '@/components/TideInfoContent';
 import SelectionPanel, { PanelSelection } from '@/components/SelectionPanel';
-import Calendar from '@/components/Calendar';
 import FishingBan from '@/components/FishingBan';
+import FeedbackPage from '@/components/FeedbackPage';
 import MorePage from '@/components/MorePage';
 import BottomNav, { AppTab } from '@/components/BottomNav';
 
@@ -57,7 +57,6 @@ export default function Home() {
           <TideLayer kakaoMap={kakaoMap} visible={tideVisible} onStationSelect={handleStationSelect} />
           <SearchBar mapRef={mapRef} />
 
-          {/* 내 위치 버튼 */}
           <button
             onClick={handleLocationClick}
             className="absolute top-16 right-3 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-lg active:bg-gray-100 transition-colors"
@@ -73,17 +72,17 @@ export default function Home() {
           <SelectionPanel selection={selection} onClose={handlePanelClose} />
         </div>
 
-        {/* 달력 탭 */}
-        {activeTab === 'calendar' && (
-          <div className="absolute inset-0">
-            <Calendar />
-          </div>
-        )}
-
-        {/* 금어기 탭 */}
+        {/* 금지정보 탭 */}
         {activeTab === 'ban' && (
           <div className="absolute inset-0">
             <FishingBan />
+          </div>
+        )}
+
+        {/* 개선요청 탭 */}
+        {activeTab === 'feedback' && (
+          <div className="absolute inset-0">
+            <FeedbackPage />
           </div>
         )}
 
