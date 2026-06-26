@@ -419,6 +419,7 @@ const KakaoMap = forwardRef<KakaoMapHandle, KakaoMapProps>(function KakaoMap(
 
   // 지도 클릭 → 선택 해제
   const handleMapClick = useCallback(() => {
+    console.log('[DEBUG] handleMapClick called');
     setSelectedId(null);
     onSelectRef.current(null);
   }, []);
@@ -459,12 +460,14 @@ const KakaoMap = forwardRef<KakaoMapHandle, KakaoMapProps>(function KakaoMap(
   // ── 폴리곤 클릭 → 선택 ────────────────────────
   const handlePolygonClick = useCallback((feature: any, _target: any, mouseEvent: any) => {
     mouseEvent?.stop?.();
+    console.log('[DEBUG] handlePolygonClick called, id=', feature.properties.id);
     setSelectedId(feature.properties.id);
     onSelectRef.current(feature.properties);
   }, []);
 
   // ── 오버레이 클릭 → 선택(폴리곤 강조 없이 정보만 표시, 기존 동작 유지) ──
   const handleOverlaySelect = useCallback((props: FarmProperties) => {
+    console.log('[DEBUG] handleOverlaySelect called, id=', props.id);
     setSelectedId(null);
     onSelectRef.current(props);
   }, []);
