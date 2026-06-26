@@ -25,7 +25,7 @@ export default function BottomSheet({
       {/* 배경 딤 (모바일) */}
       <div
         onClick={onClose}
-        className={`absolute inset-0 bg-black/20 z-20 md:hidden transition-opacity duration-300
+        className={`absolute inset-0 bg-black/20 z-[999] md:hidden transition-opacity duration-300
                     ${open ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
       />
 
@@ -37,7 +37,7 @@ export default function BottomSheet({
                     md:left-auto md:right-4 md:bottom-4 md:w-[22rem]
                     bg-white rounded-t-[20px] md:rounded-[20px]
                     shadow-[0_-2px_20px_rgba(0,0,0,0.18)] md:shadow-xl
-                    z-30 max-h-[70vh] overflow-y-auto
+                    z-[1000] max-h-[70vh] overflow-y-auto
                     transition-transform duration-300 ease-out will-change-transform
                     ${open ? 'translate-y-0' : 'translate-y-full md:translate-y-8 md:opacity-0'}`}
       >
