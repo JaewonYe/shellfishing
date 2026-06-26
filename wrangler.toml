@@ -6,4 +6,4 @@ pages_build_output_dir = ".vercel/output/static"
 [[d1_databases]]
 binding = "DB"
 database_name = "gongyuhae-db"
-database_id = "placeholder-replace-with-actual-id"
+database_id = "a1a43753-f76e-460a-8b24-a3a47592a381"
