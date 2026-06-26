@@ -31,6 +31,7 @@ export default function BottomSheet({
 
       {/* 하단 시트 */}
       <div
+        onClick={(e) => e.stopPropagation()}
         onTransitionEnd={onTransitionEnd}
         className={`absolute bottom-0 left-0 right-0
                     md:left-auto md:right-4 md:bottom-4 md:w-[22rem]
