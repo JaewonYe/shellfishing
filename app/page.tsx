@@ -22,7 +22,6 @@ export default function Home() {
   const mapRef = useRef<KakaoMapHandle>(null);
 
   const handleFarmSelect = useCallback((farm: FarmProperties | null) => {
-    console.log('[DEBUG] handleFarmSelect called, farm=', farm ? farm.name : 'null');
     setSelection(farm ? { kind: 'farm', data: farm } : null);
   }, []);
 
@@ -40,7 +39,6 @@ export default function Home() {
   }, []);
 
   const handlePanelClose = useCallback(() => {
-    console.log('[DEBUG] handlePanelClose called');
     setSelection(null);
     mapRef.current?.deselectPolygon();
   }, []);
