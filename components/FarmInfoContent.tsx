@@ -49,7 +49,7 @@ export default function FarmInfoContent({ farm: f, onClose }: FarmInfoContentPro
       <div className="flex items-start justify-between gap-2 mb-4">
         <h2 className="text-lg font-bold text-ocean-dark leading-snug flex-1">{title}</h2>
         <button
-          onClick={onClose}
+          onClick={() => { console.log('[DEBUG] FarmInfoContent × button clicked'); onClose(); }}
           className="mt-0.5 w-7 h-7 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 text-lg leading-none flex-shrink-0 active:opacity-70"
           aria-label="닫기"
         >
@@ -69,7 +69,7 @@ export default function FarmInfoContent({ farm: f, onClose }: FarmInfoContentPro
 
       <div className="flex gap-2">
         <button
-          onClick={onClose}
+          onClick={() => { console.log('[DEBUG] FarmInfoContent 닫기 button clicked'); onClose(); }}
           className="flex-1 py-3 rounded-xl bg-gray-100 text-gray-600 font-semibold text-sm active:opacity-75"
         >
           닫기

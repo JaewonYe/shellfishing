@@ -24,14 +24,17 @@ export default function SelectionPanel({ selection, onClose }: SelectionPanelPro
 
   useEffect(() => {
     if (selection) {
+      console.log('[DEBUG] SelectionPanel useEffect: selection set, opening', selection.kind);
       setDisplay(selection);
       requestAnimationFrame(() => setOpen(true));
     } else {
+      console.log('[DEBUG] SelectionPanel useEffect: selection null, closing');
       setOpen(false);
     }
   }, [selection]);
 
   const handleTransitionEnd = () => {
+    console.log('[DEBUG] SelectionPanel handleTransitionEnd, open=', open);
     if (!open) setDisplay(null);
   };
 

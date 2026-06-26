@@ -24,7 +24,7 @@ export default function BottomSheet({
     <>
       {/* 배경 딤 (모바일) */}
       <div
-        onClick={onClose}
+        onClick={() => { console.log('[DEBUG] BottomSheet dim clicked'); onClose(); }}
         className={`absolute inset-0 bg-black/20 z-[999] md:hidden transition-opacity duration-300
                     ${open ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
       />
