@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     apple: '/icons/icon-192.png',
   },
   other: {
-    'naver-site-verification': process.env.NEXT_PUBLIC_NAVER_VERIFICATION || '',
+    'naver-site-verification': '6becb5419cabac6d28e3ba3afd8641a3ed911567',
     'google-site-verification': process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION || '',
   },
 };
