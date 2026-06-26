@@ -71,6 +71,9 @@ export interface KakaoMapHandle {
 interface KakaoMapProps {
   onFarmSelect: (farm: FarmProperties | null) => void;
   onMapReady?: (map: any) => void;
+  showVillage?: boolean;
+  showAqua?: boolean;
+  showSetnet?: boolean;
 }
 
 // kakao SDK global 타입 선언 (panTo·검색·위치이동 등 services 호출에 필요)
@@ -257,22 +260,21 @@ function addBbox(features: any[]): any[] {
 
 // ── 컴포넌트 ──────────────────────────────────────
 const KakaoMap = forwardRef<KakaoMapHandle, KakaoMapProps>(function KakaoMap(
-  { onFarmSelect, onMapReady },
+  { onFarmSelect, onMapReady, showVillage = true, showAqua = true, showSetnet = true },
   ref,
 ) {
   useKakaoLoader({ appkey: KAKAO_KEY, libraries: ['services'] });
 
   const [map, setMap] = useState<any>(null);
 
-  // 레이어별 피처 배열 (전체 데이터)
   const villageRef      = useRef<any[]>([]);
   const aquaRef         = useRef<any[]>([]);
   const setnetRef       = useRef<any[]>([]);
   const aquaLoadedRef   = useRef(false);
   const setnetLoadedRef = useRef(false);
-  const showVillageRef = useRef(true);
-  const showAquaRef    = useRef(true);
-  const showSetnetRef  = useRef(true);
+  const showVillageRef = useRef(showVillage);
+  const showAquaRef    = useRef(showAqua);
+  const showSetnetRef  = useRef(showSetnet);
   const onSelectRef    = useRef(onFarmSelect);
   const idleTimerRef   = useRef<ReturnType<typeof setTimeout>>();
 
@@ -286,6 +288,9 @@ const KakaoMap = forwardRef<KakaoMapHandle, KakaoMapProps>(function KakaoMap(
   const [myLocation, setMyLocation]           = useState<{ lat: number; lng: number } | null>(null);
 
   useEffect(() => { onSelectRef.current = onFarmSelect; }, [onFarmSelect]);
+  useEffect(() => { showVillageRef.current = showVillage; }, [showVillage]);
+  useEffect(() => { showAquaRef.current = showAqua; }, [showAqua]);
+  useEffect(() => { showSetnetRef.current = showSetnet; }, [showSetnet]);
 
   // ── 토스트 ────────────────────────────────────
   const showToast = useCallback((msg: string) => {
@@ -418,8 +423,35 @@ const KakaoMap = forwardRef<KakaoMapHandle, KakaoMapProps>(function KakaoMap(
   // ── 레이어 토글 시 on-demand 로딩 + 재렌더 ──
   useEffect(() => {
     if (!map) return;
-    renderVisible();
-  }, [map, renderVisible]);
+    const jobs: Promise<void>[] = [];
+
+    if (showAqua && !aquaLoadedRef.current) {
+      aquaLoadedRef.current = true;
+      jobs.push(
+        fetch('/aquafarms.geojson')
+          .then(r => { if (!r.ok) throw new Error('not found'); return r.json(); })
+          .then(json => { aquaRef.current = addBbox(json.features ?? []); })
+          .catch(() => { aquaLoadedRef.current = false; }),
+      );
+    }
+
+    if (showSetnet && !setnetLoadedRef.current) {
+      setnetLoadedRef.current = true;
+      jobs.push(
+        fetch('/setnets.geojson')
+          .then(r => { if (!r.ok) throw new Error('not found'); return r.json(); })
+          .then(json => { setnetRef.current = addBbox(json.features ?? []); })
+          .catch(() => { setnetLoadedRef.current = false; }),
+      );
+    }
+
+    if (jobs.length > 0) {
+      Promise.all(jobs).then(() => renderVisible());
+    } else {
+      renderVisible();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showVillage, showAqua, showSetnet]);
 
   // ── 폴리곤 클릭 → 선택 ────────────────────────
   const handlePolygonClick = useCallback((feature: any, _target: any, mouseEvent: any) => {

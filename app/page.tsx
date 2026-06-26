@@ -9,12 +9,17 @@ import { TideStationInfo } from '@/components/TideInfoContent';
 import SelectionPanel, { PanelSelection } from '@/components/SelectionPanel';
 import Calendar from '@/components/Calendar';
 import FishingBan from '@/components/FishingBan';
+import MorePage from '@/components/MorePage';
 import BottomNav, { AppTab } from '@/components/BottomNav';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<AppTab>('map');
   const [selection, setSelection] = useState<PanelSelection>(null);
   const [kakaoMap, setKakaoMap] = useState<any>(null);
+  const [tideVisible, setTideVisible] = useState(true);
+  const [showVillage, setShowVillage] = useState(true);
+  const [showAqua, setShowAqua] = useState(true);
+  const [showSetnet, setShowSetnet] = useState(true);
   const mapRef = useRef<KakaoMapHandle>(null);
 
   const handleFarmSelect = useCallback((farm: FarmProperties | null) => {
@@ -45,8 +50,11 @@ export default function Home() {
             ref={mapRef}
             onFarmSelect={handleFarmSelect}
             onMapReady={setKakaoMap}
+            showVillage={showVillage}
+            showAqua={showAqua}
+            showSetnet={showSetnet}
           />
-          <TideLayer kakaoMap={kakaoMap} visible onStationSelect={handleStationSelect} />
+          <TideLayer kakaoMap={kakaoMap} visible={tideVisible} onStationSelect={handleStationSelect} />
           <SearchBar mapRef={mapRef} />
 
           {/* 내 위치 버튼 */}
@@ -77,6 +85,20 @@ export default function Home() {
           <div className="absolute inset-0">
             <FishingBan />
           </div>
+        )}
+
+        {/* 기타 탭 */}
+        {activeTab === 'more' && (
+          <MorePage
+            showVillage={showVillage}
+            onVillageToggle={() => setShowVillage(v => !v)}
+            showAqua={showAqua}
+            onAquaToggle={() => setShowAqua(v => !v)}
+            showSetnet={showSetnet}
+            onSetnetToggle={() => setShowSetnet(v => !v)}
+            tideVisible={tideVisible}
+            onTideToggle={() => setTideVisible(v => !v)}
+          />
         )}
       </div>
 

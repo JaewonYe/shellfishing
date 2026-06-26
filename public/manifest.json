@@ -1,7 +1,7 @@
 {
-  "name": "해루질 맵",
-  "short_name": "해루질맵",
-  "description": "마을어장 정보를 지도에서 확인하는 해루질 도우미 앱",
+  "name": "공유해",
+  "short_name": "공유해",
+  "description": "해루질·낚시 등 바다 레저에 필요한 정보를 공유하는 앱",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
