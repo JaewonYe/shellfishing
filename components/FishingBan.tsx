@@ -85,12 +85,16 @@ const SPECIES: SpeciesData[] = [
   },
   {
     id: 'mackerel-s', emoji: '🐟', name: '삼치', category: '어류',
-    bans: [{ label: '전국', regions: ['전국'], ban: { from: [5, 1], to: [5, 31] } }],
+    bans: [{ label: '전국', regions: ['전국'], ban: { from: [5, 1], to: [6, 30] } }],
   },
   {
     id: 'bream-b', emoji: '🐟', name: '감성돔', category: '어류',
-    bans: [{ label: '전국', regions: ['전국'], ban: { from: [5, 1], to: [5, 31] } }],
-    notes: ['지역에 따라 기간 상이 — 해양수산부 공고 확인 권장'],
+    bans: [
+      { label: '남해', regions: ['남해'], ban: { from: [5, 1], to: [6, 15] } },
+      { label: '동해', regions: ['동해'], ban: { from: [5, 10], to: [6, 30] } },
+    ],
+    minSize: '전장 25cm 미만',
+    notes: ['2025년 금지체장 25cm로 상향'],
   },
   {
     // 참돔은 서해·남해만 적용 (동해 미규정)
@@ -101,12 +105,12 @@ const SPECIES: SpeciesData[] = [
   },
   {
     id: 'gizzard', emoji: '🐟', name: '전어', category: '어류',
-    bans: [{ label: '전국', regions: ['전국'], ban: { from: [5, 1], to: [5, 31] } }],
+    bans: [{ label: '전국 (강원·경북 제외)', regions: ['서해', '남해', '제주'], ban: { from: [5, 1], to: [7, 15] } }],
   },
   {
     id: 'mackerel', emoji: '🐟', name: '고등어', category: '어류',
-    bans: [{ label: '전국', regions: ['전국'], ban: { from: [5, 4], to: [6, 3] } }],
-    notes: ['소형선망·제주정치망 어업: 4/1~4/30 (어업 방법 제한)'],
+    bans: [{ label: '전국', regions: ['전국'], ban: { from: [4, 12], to: [5, 12] } }],
+    notes: ['2025년 고시 기준 · 매년 해양수산부 고시로 기간 변동'],
   },
   {
     id: 'seabass', emoji: '🐟', name: '농어', category: '어류',
@@ -160,7 +164,7 @@ const SPECIES: SpeciesData[] = [
   // ── 연체류 ─────────────────────────────────────
   {
     id: 'squid', emoji: '🦑', name: '살오징어', category: '연체류',
-    bans: [{ label: '전국', regions: ['전국'], ban: { from: [4, 1], to: [5, 31] } }],
+    bans: [{ label: '전국', regions: ['전국'], ban: { from: [4, 1], to: [6, 30] } }],
     minSize: '외투장 15cm 미만',
   },
   {
@@ -174,8 +178,8 @@ const SPECIES: SpeciesData[] = [
   },
   {
     id: 'cuttlefish', emoji: '🦑', name: '갑오징어', category: '연체류',
-    bans: [{ label: '전국', regions: ['전국'], ban: { from: [5, 20], to: [7, 10] } }],
-    notes: ['※ 지역별 상이할 수 있음 — 해양수산부 공고 확인 권장'],
+    bans: [],
+    notes: ['법정 금어기 없음 (2025년 기준 미지정)'],
   },
   {
     // 낙지: 지역별 금어기 가장 복잡
