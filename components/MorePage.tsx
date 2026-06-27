@@ -11,6 +11,8 @@ interface MorePageProps {
   onSetnetToggle: () => void;
   tideVisible: boolean;
   onTideToggle: () => void;
+  cctvVisible: boolean;
+  onCctvToggle: () => void;
 }
 
 interface BeforeInstallPromptEvent extends Event {
@@ -73,6 +75,7 @@ export default function MorePage({
   showAqua, onAquaToggle,
   showSetnet, onSetnetToggle,
   tideVisible, onTideToggle,
+  cctvVisible, onCctvToggle,
 }: MorePageProps) {
   const checked = { village: showVillage, aqua: showAqua, setnet: showSetnet };
   const onToggle = { village: onVillageToggle, aqua: onAquaToggle, setnet: onSetnetToggle };
@@ -217,6 +220,18 @@ export default function MorePage({
                 type="checkbox"
                 checked={tideVisible}
                 onChange={onTideToggle}
+                className="w-5 h-5 rounded accent-ocean-mid cursor-pointer"
+              />
+            </label>
+            <label className="flex items-center justify-between px-3 py-3 rounded-xl cursor-pointer hover:bg-gray-50 active:bg-gray-100">
+              <div>
+                <span className="text-sm font-medium text-gray-800">교통 CCTV</span>
+                <p className="text-[11px] text-gray-400 mt-0.5">도로 교통 CCTV 실시간 영상</p>
+              </div>
+              <input
+                type="checkbox"
+                checked={cctvVisible}
+                onChange={onCctvToggle}
                 className="w-5 h-5 rounded accent-ocean-mid cursor-pointer"
               />
             </label>

@@ -11,6 +11,7 @@ import FishingBan from '@/components/FishingBan';
 import FeedbackPage from '@/components/FeedbackPage';
 import MyPage from '@/components/MyPage';
 import MorePage from '@/components/MorePage';
+import CctvLayer from '@/components/CctvLayer';
 import BottomNav, { AppTab } from '@/components/BottomNav';
 
 export default function Home() {
@@ -21,6 +22,7 @@ export default function Home() {
   const [showVillage, setShowVillage] = useState(true);
   const [showAqua, setShowAqua] = useState(true);
   const [showSetnet, setShowSetnet] = useState(true);
+  const [cctvVisible, setCctvVisible] = useState(false);
   const mapRef = useRef<KakaoMapHandle>(null);
 
   const handleFarmSelect = useCallback((farm: FarmProperties | null) => {
@@ -56,6 +58,7 @@ export default function Home() {
             showSetnet={showSetnet}
           />
           <TideLayer kakaoMap={kakaoMap} visible={tideVisible} onStationSelect={handleStationSelect} />
+          <CctvLayer kakaoMap={kakaoMap} visible={cctvVisible} />
           <SearchBar mapRef={mapRef} />
 
           <button
@@ -105,6 +108,8 @@ export default function Home() {
             onSetnetToggle={() => setShowSetnet(v => !v)}
             tideVisible={tideVisible}
             onTideToggle={() => setTideVisible(v => !v)}
+            cctvVisible={cctvVisible}
+            onCctvToggle={() => setCctvVisible(v => !v)}
           />
         )}
       </div>
