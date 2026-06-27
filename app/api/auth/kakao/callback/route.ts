@@ -18,76 +18,81 @@ export async function GET(request: Request) {
   const error = searchParams.get('error');
 
   if (error || !code) {
-    return NextResponse.redirect('https://www.gongyuhae.com/?auth=failed');
+    return NextResponse.redirect(`https://www.gongyuhae.com/?auth=failed&step=code&reason=${error ?? 'no-code'}`);
   }
 
-  // 1. Exchange code for access token
-  const tokenRes = await fetch('https://kauth.kakao.com/oauth/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      grant_type: 'authorization_code',
-      client_id: KAKAO_CLIENT_ID,
-      redirect_uri: REDIRECT_URI,
-      code,
-    }),
-  });
-
-  if (!tokenRes.ok) {
-    return NextResponse.redirect('https://www.gongyuhae.com/?auth=failed');
+  let tokenData: any;
+  try {
+    const tokenRes = await fetch('https://kauth.kakao.com/oauth/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'authorization_code',
+        client_id: KAKAO_CLIENT_ID,
+        redirect_uri: REDIRECT_URI,
+        code,
+      }),
+    });
+    tokenData = await tokenRes.json();
+    if (!tokenData.access_token) {
+      return NextResponse.redirect(`https://www.gongyuhae.com/?auth=failed&step=token&reason=${tokenData.error ?? 'no-token'}`);
+    }
+  } catch (e: any) {
+    return NextResponse.redirect(`https://www.gongyuhae.com/?auth=failed&step=token&reason=${e.message}`);
   }
 
-  const tokenData = await tokenRes.json();
-  const accessToken = tokenData.access_token;
-
-  // 2. Get user info
-  const userRes = await fetch('https://kapi.kakao.com/v2/user/me', {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
-
-  if (!userRes.ok) {
-    return NextResponse.redirect('https://www.gongyuhae.com/?auth=failed');
+  let userData: any;
+  try {
+    const userRes = await fetch('https://kapi.kakao.com/v2/user/me', {
+      headers: { Authorization: `Bearer ${tokenData.access_token}` },
+    });
+    if (!userRes.ok) {
+      return NextResponse.redirect(`https://www.gongyuhae.com/?auth=failed&step=userinfo&reason=status-${userRes.status}`);
+    }
+    userData = await userRes.json();
+  } catch (e: any) {
+    return NextResponse.redirect(`https://www.gongyuhae.com/?auth=failed&step=userinfo&reason=${e.message}`);
   }
 
-  const userData = await userRes.json();
   const kakaoId = String(userData.id);
   const nickname = userData.kakao_account?.profile?.nickname ?? '';
   const profileImg = userData.kakao_account?.profile?.profile_image_url ?? '';
 
-  // 3. Upsert user in DB
   const db = getDB(request);
   if (!db) {
-    return NextResponse.redirect('https://www.gongyuhae.com/?auth=failed');
+    return NextResponse.redirect('https://www.gongyuhae.com/?auth=failed&step=db&reason=no-db');
   }
 
-  await db.prepare(
-    `INSERT INTO users (kakao_id, nickname, profile_img)
-     VALUES (?, ?, ?)
-     ON CONFLICT(kakao_id) DO UPDATE SET nickname=excluded.nickname, profile_img=excluded.profile_img, updated_at=datetime('now')`
-  ).bind(kakaoId, nickname, profileImg).run();
+  try {
+    await db.prepare(
+      `INSERT INTO users (kakao_id, nickname, profile_img)
+       VALUES (?, ?, ?)
+       ON CONFLICT(kakao_id) DO UPDATE SET nickname=excluded.nickname, profile_img=excluded.profile_img, updated_at=datetime('now')`
+    ).bind(kakaoId, nickname, profileImg).run();
 
-  const user = await db.prepare('SELECT id FROM users WHERE kakao_id = ?').bind(kakaoId).first();
-  if (!user) {
-    return NextResponse.redirect('https://www.gongyuhae.com/?auth=failed');
+    const user = await db.prepare('SELECT id FROM users WHERE kakao_id = ?').bind(kakaoId).first();
+    if (!user) {
+      return NextResponse.redirect('https://www.gongyuhae.com/?auth=failed&step=db&reason=user-not-found');
+    }
+
+    const sessionToken = generateToken();
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+    await db.prepare(
+      'INSERT INTO sessions (token, user_id, expires_at) VALUES (?, ?, ?)'
+    ).bind(sessionToken, user.id, expiresAt).run();
+
+    const response = NextResponse.redirect('https://www.gongyuhae.com/?auth=success');
+    response.cookies.set('session', sessionToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 30 * 24 * 60 * 60,
+    });
+
+    return response;
+  } catch (e: any) {
+    return NextResponse.redirect(`https://www.gongyuhae.com/?auth=failed&step=db&reason=${encodeURIComponent(e.message)}`);
   }
-
-  // 4. Create session
-  const sessionToken = generateToken();
-  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days
-
-  await db.prepare(
-    'INSERT INTO sessions (token, user_id, expires_at) VALUES (?, ?, ?)'
-  ).bind(sessionToken, user.id, expiresAt).run();
-
-  // 5. Set cookie and redirect
-  const response = NextResponse.redirect('https://www.gongyuhae.com/?auth=success');
-  response.cookies.set('session', sessionToken, {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 30 * 24 * 60 * 60,
-  });
-
-  return response;
 }
