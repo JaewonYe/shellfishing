@@ -12,7 +12,7 @@ export async function GET(request: Request) {
   }
 
   const { results } = await db
-    .prepare('SELECT id, category, content, created_at FROM feedback ORDER BY created_at DESC LIMIT 100')
+    .prepare('SELECT id, category, content, status, admin_reply, created_at FROM feedback ORDER BY created_at DESC LIMIT 100')
     .all();
 
   return NextResponse.json({ items: results ?? [] });

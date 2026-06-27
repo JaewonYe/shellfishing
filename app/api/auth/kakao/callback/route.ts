@@ -67,9 +67,11 @@ export async function GET(request: Request) {
 
   try {
     await db.prepare(
-      `INSERT INTO users (kakao_id, nickname, profile_img)
-       VALUES (?, ?, ?)
-       ON CONFLICT(kakao_id) DO UPDATE SET nickname=excluded.nickname, profile_img=excluded.profile_img, updated_at=datetime('now')`
+      `INSERT INTO users (kakao_id, nickname, profile_img, login_count, last_login_at)
+       VALUES (?, ?, ?, 1, datetime('now'))
+       ON CONFLICT(kakao_id) DO UPDATE SET
+         nickname=excluded.nickname, profile_img=excluded.profile_img,
+         login_count=login_count+1, last_login_at=datetime('now'), updated_at=datetime('now')`
     ).bind(kakaoId, nickname, profileImg).run();
 
     const user = await db.prepare('SELECT id FROM users WHERE kakao_id = ?').bind(kakaoId).first();
