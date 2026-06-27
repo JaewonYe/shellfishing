@@ -8,6 +8,8 @@ interface FeedbackItem {
   content: string;
   status?: string;
   admin_reply?: string;
+  is_mine?: boolean;
+  is_anonymous?: boolean;
   created_at: string;
 }
 
@@ -37,9 +39,14 @@ export default function FeedbackPage() {
   const [items, setItems] = useState<FeedbackItem[]>([]);
   const [category, setCategory] = useState('feature');
   const [content, setContent] = useState('');
+  const [password, setPassword] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [useApi, setUseApi] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | string | null>(null);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteError, setDeleteError] = useState('');
 
   useEffect(() => {
     fetch('/api/feedback')
@@ -50,6 +57,7 @@ export default function FeedbackPage() {
         } else {
           setItems(data.items ?? []);
           setUseApi(true);
+          setLoggedIn(!!data.userId);
         }
       })
       .catch(() => {
@@ -61,19 +69,22 @@ export default function FeedbackPage() {
   const handleSubmit = useCallback(async () => {
     const text = content.trim();
     if (!text) return;
+    if (!loggedIn && password.length < 4) return;
 
     if (useApi) {
       try {
+        const body: any = { category, content: text };
+        if (!loggedIn) body.password = password;
         const res = await fetch('/api/feedback', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ category, content: text }),
+          body: JSON.stringify(body),
         });
         if (res.ok) {
           const item = await res.json();
           setItems(prev => [item, ...prev]);
         }
-      } catch { /* 폴백 없이 실패 */ }
+      } catch {}
     } else {
       const item: FeedbackItem = {
         id: Date.now().toString(36),
@@ -87,20 +98,51 @@ export default function FeedbackPage() {
     }
 
     setContent('');
+    setPassword('');
     setSubmitted(true);
     setTimeout(() => setSubmitted(false), 2500);
-  }, [category, content, items, useApi]);
+  }, [category, content, password, items, useApi, loggedIn]);
 
-  const handleDelete = useCallback(async (id: number | string) => {
+  const handleDeleteClick = useCallback((id: number | string, isMine?: boolean, isAnonymous?: boolean) => {
+    if (isMine) {
+      // 본인 글은 바로 삭제
+      performDelete(id);
+    } else if (isAnonymous) {
+      // 비회원 글은 비밀번호 입력
+      setDeletingId(id);
+      setDeletePassword('');
+      setDeleteError('');
+    }
+  }, []);
+
+  const performDelete = useCallback(async (id: number | string, pw?: string) => {
     if (useApi) {
       try {
-        await fetch(`/api/feedback?id=${id}`, { method: 'DELETE' });
-      } catch { /* ignore */ }
+        let url = `/api/feedback?id=${id}`;
+        if (pw) url += `&password=${encodeURIComponent(pw)}`;
+        const res = await fetch(url, { method: 'DELETE' });
+        if (!res.ok) {
+          const data = await res.json();
+          if (data.error === 'wrong password') {
+            setDeleteError('비밀번호가 일치하지 않습니다.');
+            return;
+          }
+          return;
+        }
+      } catch { return; }
     }
     const updated = items.filter(i => i.id !== id);
     setItems(updated);
     if (!useApi) saveLocal(updated);
+    setDeletingId(null);
+    setDeletePassword('');
+    setDeleteError('');
   }, [items, useApi]);
+
+  const handleDeleteConfirm = useCallback(() => {
+    if (deletingId == null || !deletePassword) return;
+    performDelete(deletingId, deletePassword);
+  }, [deletingId, deletePassword, performDelete]);
 
   const categoryLabel = (value: string) =>
     CATEGORIES.find(c => c.value === value)?.label ?? value;
@@ -109,6 +151,8 @@ export default function FeedbackPage() {
     const d = new Date(iso);
     return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
   };
+
+  const canDelete = (item: FeedbackItem) => item.is_mine || item.is_anonymous;
 
   return (
     <div className="absolute inset-0 bg-gray-50 overflow-y-auto">
@@ -152,9 +196,26 @@ export default function FeedbackPage() {
             />
           </div>
 
+          {/* 비회원 비밀번호 입력 */}
+          {useApi && !loggedIn && (
+            <div className="mb-4">
+              <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-2">
+                삭제용 비밀번호
+              </p>
+              <input
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="4자 이상 입력 (삭제 시 필요)"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-800
+                           placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-ocean-mid/30 focus:border-ocean-mid"
+              />
+            </div>
+          )}
+
           <button
             onClick={handleSubmit}
-            disabled={!content.trim()}
+            disabled={!content.trim() || (useApi && !loggedIn && password.length < 4)}
             className="w-full py-3 rounded-xl bg-ocean-mid text-white font-semibold text-sm
                        active:opacity-75 disabled:bg-gray-200 disabled:text-gray-400 transition-colors"
           >
@@ -186,13 +247,15 @@ export default function FeedbackPage() {
                     </span>
                     <div className="flex items-center gap-2">
                       <span className="text-[11px] text-gray-300">{formatDate(item.created_at)}</span>
-                      <button
-                        onClick={() => handleDelete(item.id)}
-                        className="text-gray-300 hover:text-red-400 text-xs"
-                        aria-label="삭제"
-                      >
-                        &times;
-                      </button>
+                      {canDelete(item) && (
+                        <button
+                          onClick={() => handleDeleteClick(item.id, item.is_mine, item.is_anonymous)}
+                          className="text-gray-300 hover:text-red-400 text-xs"
+                          aria-label="삭제"
+                        >
+                          &times;
+                        </button>
+                      )}
                     </div>
                   </div>
                   <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">{item.content}</p>
@@ -210,6 +273,37 @@ export default function FeedbackPage() {
                     <div className="mt-2 bg-blue-50 rounded-lg p-3">
                       <p className="text-[11px] font-semibold text-blue-600 mb-1">관리자 답변</p>
                       <p className="text-sm text-gray-700 whitespace-pre-wrap">{item.admin_reply}</p>
+                    </div>
+                  )}
+
+                  {/* 비밀번호 입력 모달 */}
+                  {deletingId === item.id && (
+                    <div className="mt-3 bg-gray-50 rounded-lg p-3 space-y-2">
+                      <p className="text-[11px] font-semibold text-gray-500">삭제하려면 비밀번호를 입력하세요</p>
+                      <input
+                        type="password"
+                        value={deletePassword}
+                        onChange={e => { setDeletePassword(e.target.value); setDeleteError(''); }}
+                        placeholder="비밀번호"
+                        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-ocean-mid/30"
+                      />
+                      {deleteError && (
+                        <p className="text-[11px] text-red-500">{deleteError}</p>
+                      )}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleDeleteConfirm}
+                          className="flex-1 py-2 rounded-lg bg-red-500 text-white text-sm font-semibold active:opacity-75"
+                        >
+                          삭제
+                        </button>
+                        <button
+                          onClick={() => { setDeletingId(null); setDeleteError(''); }}
+                          className="py-2 px-4 rounded-lg bg-gray-200 text-gray-500 text-sm font-medium active:bg-gray-300"
+                        >
+                          취소
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
