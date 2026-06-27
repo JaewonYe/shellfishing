@@ -103,18 +103,6 @@ export default function FeedbackPage() {
     setTimeout(() => setSubmitted(false), 2500);
   }, [category, content, password, items, useApi, loggedIn]);
 
-  const handleDeleteClick = useCallback((id: number | string, isMine?: boolean, isAnonymous?: boolean) => {
-    if (isMine) {
-      // 본인 글은 바로 삭제
-      performDelete(id);
-    } else if (isAnonymous) {
-      // 비회원 글은 비밀번호 입력
-      setDeletingId(id);
-      setDeletePassword('');
-      setDeleteError('');
-    }
-  }, []);
-
   const performDelete = useCallback(async (id: number | string, pw?: string) => {
     if (useApi) {
       try {
@@ -131,13 +119,25 @@ export default function FeedbackPage() {
         }
       } catch { return; }
     }
-    const updated = items.filter(i => i.id !== id);
-    setItems(updated);
-    if (!useApi) saveLocal(updated);
+    setItems(prev => {
+      const updated = prev.filter(i => i.id !== id);
+      if (!useApi) saveLocal(updated);
+      return updated;
+    });
     setDeletingId(null);
     setDeletePassword('');
     setDeleteError('');
-  }, [items, useApi]);
+  }, [useApi]);
+
+  const handleDeleteClick = useCallback((id: number | string, isMine?: boolean, isAnonymous?: boolean) => {
+    if (isMine) {
+      performDelete(id);
+    } else if (isAnonymous) {
+      setDeletingId(id);
+      setDeletePassword('');
+      setDeleteError('');
+    }
+  }, [performDelete]);
 
   const handleDeleteConfirm = useCallback(() => {
     if (deletingId == null || !deletePassword) return;
