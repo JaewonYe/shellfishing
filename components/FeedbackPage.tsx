@@ -6,6 +6,8 @@ interface FeedbackItem {
   id: number | string;
   category: string;
   content: string;
+  status?: string;
+  admin_reply?: string;
   created_at: string;
 }
 
@@ -194,6 +196,22 @@ export default function FeedbackPage() {
                     </div>
                   </div>
                   <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">{item.content}</p>
+                  {item.status && item.status !== 'pending' && (
+                    <div className="mt-2">
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium
+                        ${item.status === 'in-progress' ? 'bg-blue-100 text-blue-600' :
+                          item.status === 'resolved' ? 'bg-green-100 text-green-600' :
+                          item.status === 'rejected' ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500'}`}>
+                        {item.status === 'in-progress' ? '진행중' : item.status === 'resolved' ? '완료' : item.status === 'rejected' ? '반려' : item.status}
+                      </span>
+                    </div>
+                  )}
+                  {item.admin_reply && (
+                    <div className="mt-2 bg-blue-50 rounded-lg p-3">
+                      <p className="text-[11px] font-semibold text-blue-600 mb-1">관리자 답변</p>
+                      <p className="text-sm text-gray-700 whitespace-pre-wrap">{item.admin_reply}</p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

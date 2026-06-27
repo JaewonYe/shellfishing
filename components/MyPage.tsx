@@ -1,17 +1,20 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import AdminPage from './AdminPage';
 
 interface User {
   id: number;
   nickname: string;
   profileImg: string;
+  role: string;
   createdAt: string;
 }
 
 export default function MyPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showAdmin, setShowAdmin] = useState(false);
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -36,6 +39,10 @@ export default function MyPage() {
         <p className="text-sm text-gray-400">불러오는 중...</p>
       </div>
     );
+  }
+
+  if (showAdmin && user?.role === 'admin') {
+    return <AdminPage onBack={() => setShowAdmin(false)} />;
   }
 
   return (
@@ -63,7 +70,12 @@ export default function MyPage() {
                   </div>
                 )}
                 <div className="flex-1">
-                  <h2 className="text-lg font-bold text-gray-800">{user.nickname || '사용자'}</h2>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-bold text-gray-800">{user.nickname || '사용자'}</h2>
+                    {user.role === 'admin' && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium bg-red-100 text-red-600">관리자</span>
+                    )}
+                  </div>
                   <p className="text-xs text-gray-400 mt-0.5">
                     가입일: {new Date(user.createdAt).toLocaleDateString('ko-KR')}
                   </p>
@@ -71,7 +83,20 @@ export default function MyPage() {
               </div>
             </section>
 
-            {/* 활동 요약 (추후 확장) */}
+            {/* 관리자 메뉴 */}
+            {user.role === 'admin' && (
+              <button
+                onClick={() => setShowAdmin(true)}
+                className="w-full py-3 rounded-xl bg-ocean-mid text-white font-semibold text-sm active:opacity-75 transition-colors flex items-center justify-center gap-2"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+                관리자 페이지
+              </button>
+            )}
+
+            {/* 활동 요약 */}
             <section className="bg-white rounded-2xl p-5 shadow-sm">
               <h3 className="text-sm font-bold text-gray-800 mb-3">내 활동</h3>
               <p className="text-sm text-gray-400">아직 활동 내역이 없습니다.</p>
@@ -86,7 +111,6 @@ export default function MyPage() {
             </button>
           </>
         ) : (
-          /* 로그인 전 */
           <section className="bg-white rounded-2xl p-5 shadow-sm text-center">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-ocean-pale flex items-center justify-center">
               <svg className="w-8 h-8 text-ocean-mid" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

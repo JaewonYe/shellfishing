@@ -18,7 +18,7 @@ export async function GET(request: Request) {
   }
 
   const row = await db.prepare(
-    `SELECT u.id, u.nickname, u.profile_img, u.created_at
+    `SELECT u.id, u.nickname, u.profile_img, u.role, u.created_at
      FROM sessions s JOIN users u ON s.user_id = u.id
      WHERE s.token = ? AND s.expires_at > datetime('now')`
   ).bind(token).first();
@@ -32,6 +32,7 @@ export async function GET(request: Request) {
       id: row.id,
       nickname: row.nickname,
       profileImg: row.profile_img,
+      role: row.role,
       createdAt: row.created_at,
     },
   });
