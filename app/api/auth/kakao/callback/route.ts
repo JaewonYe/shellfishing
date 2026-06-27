@@ -48,7 +48,8 @@ export async function GET(request: Request) {
       headers: { Authorization: `Bearer ${tokenData.access_token}` },
     });
     if (!userRes.ok) {
-      return NextResponse.redirect(`https://www.gongyuhae.com/?auth=failed&step=userinfo&reason=status-${userRes.status}`);
+      const errBody = await userRes.text().catch(() => '');
+      return NextResponse.redirect(`https://www.gongyuhae.com/?auth=failed&step=userinfo&reason=status-${userRes.status}&detail=${encodeURIComponent(errBody.slice(0, 200))}&token_type=${tokenData.token_type ?? 'none'}`);
     }
     userData = await userRes.json();
   } catch (e: any) {
