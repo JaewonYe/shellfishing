@@ -9,6 +9,7 @@ import { TideStationInfo } from '@/components/TideInfoContent';
 import SelectionPanel, { PanelSelection } from '@/components/SelectionPanel';
 import FishingBan from '@/components/FishingBan';
 import FeedbackPage from '@/components/FeedbackPage';
+import MyPage from '@/components/MyPage';
 import MorePage from '@/components/MorePage';
 import BottomNav, { AppTab } from '@/components/BottomNav';
 
@@ -83,6 +84,13 @@ export default function Home() {
         {activeTab === 'feedback' && (
           <div className="absolute inset-0">
             <FeedbackPage />
+          </div>
+        )}
+
+        {/* 마이 탭 */}
+        {activeTab === 'my' && (
+          <div className="absolute inset-0">
+            <MyPage />
           </div>
         )}
 
