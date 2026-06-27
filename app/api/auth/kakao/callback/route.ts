@@ -31,6 +31,7 @@ export async function GET(request: Request) {
         client_id: KAKAO_CLIENT_ID,
         redirect_uri: REDIRECT_URI,
         code,
+        client_secret: process.env.KAKAO_CLIENT_SECRET ?? '',
       }),
     });
     tokenData = await tokenRes.json();
