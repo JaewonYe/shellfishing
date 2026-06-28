@@ -17,11 +17,31 @@ export default function MyPage() {
   const [showAdmin, setShowAdmin] = useState(false);
 
   useEffect(() => {
-    fetch('/api/auth/me')
-      .then(r => r.json())
-      .then(data => setUser(data.user ?? null))
-      .catch(() => setUser(null))
-      .finally(() => setLoading(false));
+    let retries = 0;
+    const fetchUser = () => {
+      fetch('/api/auth/me')
+        .then(r => r.json())
+        .then(data => {
+          const u = data.user ?? null;
+          setUser(u);
+          if (u && !u.role && retries < 2) {
+            retries++;
+            setTimeout(fetchUser, 1000);
+          } else {
+            setLoading(false);
+          }
+        })
+        .catch(() => {
+          if (retries < 2) {
+            retries++;
+            setTimeout(fetchUser, 1000);
+          } else {
+            setUser(null);
+            setLoading(false);
+          }
+        });
+    };
+    fetchUser();
   }, []);
 
   const handleLogin = useCallback(() => {
