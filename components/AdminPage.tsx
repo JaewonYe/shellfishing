@@ -23,6 +23,11 @@ interface FeedbackItem {
   created_at: string;
 }
 
+interface DailyStat {
+  date: string;
+  count: number;
+}
+
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   pending: { label: '대기', color: 'bg-gray-100 text-gray-600' },
   'in-progress': { label: '진행중', color: 'bg-blue-100 text-blue-600' },
@@ -42,16 +47,27 @@ interface AdminPageProps {
 }
 
 export default function AdminPage({ onBack }: AdminPageProps) {
-  const [tab, setTab] = useState<'users' | 'feedback'>('users');
+  const [tab, setTab] = useState<'stats' | 'users' | 'feedback'>('stats');
   const [users, setUsers] = useState<UserItem[]>([]);
   const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
+  const [dailyStats, setDailyStats] = useState<DailyStat[]>([]);
+  const [totalUsers, setTotalUsers] = useState(0);
   const [loading, setLoading] = useState(true);
   const [replyingId, setReplyingId] = useState<number | null>(null);
   const [replyText, setReplyText] = useState('');
 
   useEffect(() => {
     setLoading(true);
-    if (tab === 'users') {
+    if (tab === 'stats') {
+      fetch('/api/admin/stats?days=30')
+        .then(r => r.json())
+        .then(d => {
+          setDailyStats(d.daily ?? []);
+          setTotalUsers(d.totalUsers ?? 0);
+        })
+        .catch(() => {})
+        .finally(() => setLoading(false));
+    } else if (tab === 'users') {
       fetch('/api/admin/users')
         .then(r => r.json())
         .then(d => setUsers(d.users ?? []))
@@ -102,6 +118,15 @@ export default function AdminPage({ onBack }: AdminPageProps) {
     return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
   };
 
+  const formatShortDate = (dateStr: string) => {
+    const d = new Date(dateStr + 'T00:00:00');
+    return `${d.getMonth() + 1}/${d.getDate()}`;
+  };
+
+  const maxCount = Math.max(...dailyStats.map(s => s.count), 1);
+  const todayTotal = dailyStats.length > 0 ? dailyStats[0].count : 0;
+  const weekTotal = dailyStats.slice(0, 7).reduce((s, d) => s + d.count, 0);
+
   return (
     <div className="absolute inset-0 bg-gray-50 overflow-y-auto">
       <div className="max-w-lg mx-auto px-4 py-6 space-y-4">
@@ -119,23 +144,76 @@ export default function AdminPage({ onBack }: AdminPageProps) {
         {/* 탭 */}
         <div className="flex gap-2">
           <button
+            onClick={() => setTab('stats')}
+            className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-colors
+              ${tab === 'stats' ? 'bg-ocean-mid text-white' : 'bg-white text-gray-500'}`}
+          >
+            접속 통계
+          </button>
+          <button
             onClick={() => setTab('users')}
             className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-colors
               ${tab === 'users' ? 'bg-ocean-mid text-white' : 'bg-white text-gray-500'}`}
           >
-            사용자 관리 ({users.length})
+            사용자
           </button>
           <button
             onClick={() => setTab('feedback')}
             className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-colors
               ${tab === 'feedback' ? 'bg-ocean-mid text-white' : 'bg-white text-gray-500'}`}
           >
-            개선요청 관리 ({feedbacks.length})
+            개선요청
           </button>
         </div>
 
         {loading ? (
           <p className="text-center text-sm text-gray-400 py-8">불러오는 중...</p>
+        ) : tab === 'stats' ? (
+          /* 접속 통계 */
+          <div className="space-y-4">
+            {/* 요약 카드 */}
+            <div className="grid grid-cols-3 gap-3">
+              <section className="bg-white rounded-2xl p-4 shadow-sm text-center">
+                <p className="text-2xl font-bold text-ocean-mid">{todayTotal}</p>
+                <p className="text-[10px] text-gray-400 mt-1">오늘 접속</p>
+              </section>
+              <section className="bg-white rounded-2xl p-4 shadow-sm text-center">
+                <p className="text-2xl font-bold text-ocean-mid">{weekTotal}</p>
+                <p className="text-[10px] text-gray-400 mt-1">최근 7일</p>
+              </section>
+              <section className="bg-white rounded-2xl p-4 shadow-sm text-center">
+                <p className="text-2xl font-bold text-ocean-mid">{totalUsers}</p>
+                <p className="text-[10px] text-gray-400 mt-1">전체 회원</p>
+              </section>
+            </div>
+
+            {/* 일별 차트 */}
+            <section className="bg-white rounded-2xl p-5 shadow-sm">
+              <h3 className="text-sm font-bold text-gray-800 mb-4">일별 접속 현황 (최근 30일)</h3>
+              {dailyStats.length > 0 ? (
+                <div className="space-y-2">
+                  {dailyStats.map(stat => (
+                    <div key={stat.date} className="flex items-center gap-3">
+                      <span className="text-[11px] text-gray-400 w-10 text-right flex-shrink-0">
+                        {formatShortDate(stat.date)}
+                      </span>
+                      <div className="flex-1 h-5 bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-ocean-mid rounded-full transition-all"
+                          style={{ width: `${Math.max((stat.count / maxCount) * 100, 4)}%` }}
+                        />
+                      </div>
+                      <span className="text-[11px] font-semibold text-gray-600 w-6 text-right flex-shrink-0">
+                        {stat.count}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-400 text-center py-4">접속 기록이 없습니다.</p>
+              )}
+            </section>
+          </div>
         ) : tab === 'users' ? (
           /* 사용자 목록 */
           <div className="space-y-3">
@@ -165,7 +243,7 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                 <div className="grid grid-cols-2 gap-2 text-center mb-3">
                   <div className="bg-gray-50 rounded-lg py-2">
                     <p className="text-lg font-bold text-ocean-mid">{u.login_count}</p>
-                    <p className="text-[10px] text-gray-400">접속 횟수</p>
+                    <p className="text-[10px] text-gray-400">로그인 횟수</p>
                   </div>
                   <div className="bg-gray-50 rounded-lg py-2">
                     <p className="text-[11px] font-medium text-gray-600">{formatDate(u.last_login_at)}</p>
