@@ -86,8 +86,6 @@ export async function GET(request: Request) {
       'INSERT INTO sessions (token, user_id, expires_at) VALUES (?, ?, ?)'
     ).bind(sessionToken, user.id, expiresAt).run();
 
-    await db.prepare('INSERT INTO access_log (user_id) VALUES (?)').bind(user.id).run();
-
     const response = NextResponse.redirect('https://www.gongyuhae.com/?auth=success');
     response.cookies.set('session', sessionToken, {
       httpOnly: true,
