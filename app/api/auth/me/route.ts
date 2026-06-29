@@ -28,6 +28,14 @@ export async function GET(request: Request) {
       return NextResponse.json({ user: null });
     }
 
+    // 하루 1회 접속 기록
+    const existing = await db.prepare(
+      `SELECT id FROM access_log WHERE user_id = ? AND date(accessed_at) = date('now')`
+    ).bind(row.id).first();
+    if (!existing) {
+      await db.prepare('INSERT INTO access_log (user_id) VALUES (?)').bind(row.id).run();
+    }
+
     return NextResponse.json({
       user: {
         id: row.id,
