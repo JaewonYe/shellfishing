@@ -128,6 +128,10 @@ const SPECIES: SpeciesData[] = [
     notes: ['선망어업: 4/22~8/10 (어업 방법 제한)'],
   },
   {
+    id: 'skate', emoji: '🐟', name: '참홍어', category: '어류',
+    bans: [{ label: '서해', regions: ['서해'], ban: { from: [6, 1], to: [7, 15] } }],
+  },
+  {
     id: 'flounder', emoji: '🐟', name: '넙치', sub: '광어', category: '어류',
     bans: [],
     minSize: '전장 35cm 미만',
@@ -159,6 +163,10 @@ const SPECIES: SpeciesData[] = [
     bans: [{ label: '동해', regions: ['동해'], ban: { from: [7, 10], to: [8, 25] } }],
     extraBan: '암컷 연중 포획금지',
     notes: ['동해 서식 어종'],
+  },
+  {
+    id: 'shrimp-pearl', emoji: '🦐', name: '펄닭새우', sub: '보리새우류', category: '갑각류',
+    bans: [{ label: '전국', regions: ['전국'], ban: { from: [6, 1], to: [8, 31] } }],
   },
 
   // ── 연체류 ─────────────────────────────────────
@@ -202,6 +210,33 @@ const SPECIES: SpeciesData[] = [
       { label: '제주',             regions: ['제주'],                  ban: { from: [10, 1], to: [12, 31] } },
     ],
     minSize: '각장 10cm 미만',
+  },
+  {
+    id: 'fan-shell', emoji: '🐚', name: '키조개', category: '패류',
+    bans: [{ label: '전국', regions: ['전국'], ban: { from: [7, 1], to: [8, 31] } }],
+  },
+  {
+    // 새조개: 부산·울산·경남·전남(무안·영광 제외)·제주는 6/1부터, 그 외는 6/16부터
+    id: 'cockle', emoji: '🐚', name: '새조개', category: '패류',
+    bans: [
+      { label: '부산·울산·경남·전남·제주', regions: ['남해', '제주'], ban: { from: [6, 1], to: [9, 30] } },
+      { label: '그 외 지역',               regions: ['서해', '동해'], ban: { from: [6, 16], to: [9, 30] } },
+    ],
+  },
+  {
+    id: 'clam-hard', emoji: '🐚', name: '백합', category: '패류',
+    bans: [{ label: '전국', regions: ['전국'], ban: { from: [7, 1], to: [8, 20] } }],
+    minSize: '각장 5cm 미만',
+  },
+  {
+    // 소라: 전남·제주, 제주 추자면, 경북 울릉 별도
+    id: 'turban-shell', emoji: '🐚', name: '소라', category: '패류',
+    bans: [
+      { label: '전남·제주',   regions: ['전남', '제주'], ban: { from: [6, 1], to: [8, 31] } },
+      { label: '제주 추자면', regions: ['제주'],         ban: { from: [7, 1], to: [9, 30] } },
+      { label: '경북 울릉',   regions: ['경북'],         ban: { from: [6, 1], to: [9, 30] } },
+    ],
+    notes: ['지역별 금어기 별도 적용 — 상세 내용은 시·도 공고 확인'],
   },
 ];
 
