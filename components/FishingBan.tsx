@@ -75,33 +75,29 @@ const SPECIES: SpeciesData[] = [
   },
   {
     id: 'rockfish', emoji: '🐟', name: '조피볼락', sub: '우럭', category: '어류',
-    bans: [{ label: '전국', regions: ['전국'], ban: { from: [4, 1], to: [5, 31] } }],
+    bans: [],
     minSize: '전장 23cm 미만',
+    notes: ['법정 금어기 없음 (금지체장만 적용)'],
   },
   {
     id: 'puffer', emoji: '🐡', name: '황복', category: '어류',
-    bans: [{ label: '전국', regions: ['전국'], ban: { from: [4, 1], to: [6, 30] } }],
-    minSize: '전장 20cm 미만',
+    bans: [],
+    notes: ['2023년 개정으로 금어기·금지체장 모두 폐지'],
   },
   {
     id: 'mackerel-s', emoji: '🐟', name: '삼치', category: '어류',
-    bans: [{ label: '전국', regions: ['전국'], ban: { from: [5, 1], to: [6, 30] } }],
+    bans: [{ label: '전국', regions: ['전국'], ban: { from: [5, 1], to: [5, 31] } }],
   },
   {
     id: 'bream-b', emoji: '🐟', name: '감성돔', category: '어류',
-    bans: [
-      { label: '남해', regions: ['남해'], ban: { from: [5, 1], to: [6, 15] } },
-      { label: '동해', regions: ['동해'], ban: { from: [5, 10], to: [6, 30] } },
-    ],
+    bans: [{ label: '전국', regions: ['전국'], ban: { from: [5, 1], to: [5, 31] } }],
     minSize: '전장 25cm 미만',
-    notes: ['2025년 금지체장 25cm로 상향'],
   },
   {
-    // 참돔은 서해·남해만 적용 (동해 미규정)
     id: 'bream-r', emoji: '🐟', name: '참돔', category: '어류',
-    bans: [{ label: '서해·남해', regions: ['서해', '남해'], ban: { from: [5, 5], to: [6, 20] } }],
+    bans: [],
     minSize: '전장 24cm 미만',
-    notes: ['동해 별도 규정 없음 (확인 필요)'],
+    notes: ['법정 금어기 없음 (금지체장만 적용)'],
   },
   {
     id: 'gizzard', emoji: '🐟', name: '전어', category: '어류',
@@ -110,28 +106,37 @@ const SPECIES: SpeciesData[] = [
   {
     id: 'mackerel', emoji: '🐟', name: '고등어', category: '어류',
     bans: [{ label: '전국', regions: ['전국'], ban: { from: [4, 12], to: [5, 12] } }],
-    notes: ['2025년 고시 기준 · 매년 해양수산부 고시로 기간 변동'],
+    minSize: '전장 21cm 미만',
+    notes: ['4/1~6/30 중 1개월(연도별 해양수산부 고시로 확정) · 소형선망·제주정치망은 4/1~4/30'],
   },
   {
     id: 'seabass', emoji: '🐟', name: '농어', category: '어류',
-    bans: [{ label: '전국', regions: ['전국'], ban: { from: [6, 1], to: [7, 15] } }],
-    minSize: '전장 35cm 미만',
+    bans: [],
+    minSize: '전장 30cm 미만',
+    notes: ['법정 금어기 없음 (금지체장만 적용)'],
   },
   {
     id: 'hairtail', emoji: '🐟', name: '갈치', category: '어류',
     bans: [{ label: '전국', regions: ['전국'], ban: { from: [7, 1], to: [7, 31] } }],
     minSize: '항문장 18cm 미만',
+    notes: ['근해채낚기·연안복합어업은 적용 제외'],
   },
   {
     id: 'croaker', emoji: '🐟', name: '참조기', category: '어류',
     bans: [{ label: '전국', regions: ['전국'], ban: { from: [7, 1], to: [7, 31] } }],
-    notes: ['선망어업: 4/22~8/10 (어업 방법 제한)'],
+    minSize: '전장 15cm 미만',
+    notes: ['유자망어업: 4/22~8/10 (어업 방법 별도)'],
+  },
+  {
+    id: 'skate', emoji: '🐟', name: '참홍어', category: '어류',
+    bans: [{ label: '전국', regions: ['전국'], ban: { from: [6, 1], to: [7, 15] } }],
+    minSize: '항문장 42cm 미만',
   },
   {
     id: 'flounder', emoji: '🐟', name: '넙치', sub: '광어', category: '어류',
-    bans: [],
+    bans: [{ label: '제주', regions: ['제주'], ban: { from: [9, 1], to: [11, 30] } }],
     minSize: '전장 35cm 미만',
-    notes: ['법정 금어기 없음 (체장 제한만 적용)'],
+    notes: ['제주 외 지역은 법정 금어기 없음 (지자체 고시로 별도 지정 가능)'],
   },
 
   // ── 갑각류 ─────────────────────────────────────
@@ -139,8 +144,8 @@ const SPECIES: SpeciesData[] = [
     // 꽃게: 전국 기본 + 서해5도 별도
     id: 'crab-blue', emoji: '🦀', name: '꽃게', category: '갑각류',
     bans: [
-      { label: '전국 (서해5도 제외)', regions: ['서해', '남해', '동해', '제주'], ban: { from: [6, 21], to: [8, 20] } },
-      { label: '서해5도',             regions: ['서해5도'],                        ban: { from: [7,  1], to: [8, 31] } },
+      { label: '전국 (제주·서해5도 제외)', regions: ['서해', '남해', '동해'], ban: { from: [6, 21], to: [8, 20] } },
+      { label: '서해5도',                  regions: ['서해5도'],              ban: { from: [7,  1], to: [8, 31] } },
     ],
     minSize: '갑폭 6.4cm 미만',
     extraBan: '알품은 꽃게 연중 포획금지',
@@ -158,14 +163,20 @@ const SPECIES: SpeciesData[] = [
     id: 'crab-red', emoji: '🦀', name: '붉은대게', sub: '수컷', category: '갑각류',
     bans: [{ label: '동해', regions: ['동해'], ban: { from: [7, 10], to: [8, 25] } }],
     extraBan: '암컷 연중 포획금지',
-    notes: ['동해 서식 어종'],
+    notes: ['동해 서식 어종', '강원 연안자망어업: 6/1~7/10'],
+  },
+  {
+    id: 'shrimp-pearl', emoji: '🦐', name: '펄닭새우', sub: '보리새우류', category: '갑각류',
+    bans: [{ label: '전국', regions: ['전국'], ban: { from: [6, 1], to: [8, 31] } }],
+    minSize: '10cm 미만',
   },
 
   // ── 연체류 ─────────────────────────────────────
   {
     id: 'squid', emoji: '🦑', name: '살오징어', category: '연체류',
-    bans: [{ label: '전국', regions: ['전국'], ban: { from: [4, 1], to: [6, 30] } }],
+    bans: [{ label: '전국', regions: ['전국'], ban: { from: [4, 1], to: [5, 31] } }],
     minSize: '외투장 15cm 미만',
+    notes: ['근해채낚기·연안복합·정치망어업은 4/1~4/30'],
   },
   {
     id: 'octopus-b', emoji: '🐙', name: '주꾸미', category: '연체류',
@@ -201,7 +212,36 @@ const SPECIES: SpeciesData[] = [
       { label: '전국 (제주 제외)', regions: ['서해', '남해', '동해'], ban: { from: [9,  1], to: [10, 31] } },
       { label: '제주',             regions: ['제주'],                  ban: { from: [10, 1], to: [12, 31] } },
     ],
-    minSize: '각장 10cm 미만',
+    minSize: '각장 7cm 미만 (제주 10cm)',
+  },
+  {
+    id: 'fan-shell', emoji: '🐚', name: '키조개', category: '패류',
+    bans: [{ label: '전국', regions: ['전국'], ban: { from: [7, 1], to: [8, 31] } }],
+    minSize: '각장 18cm 미만 (부산·경남·강원·경북)',
+  },
+  {
+    // 새조개: 부산·울산·경남·전남(무안·영광 제외)·제주는 6/1부터, 그 외는 6/16부터
+    id: 'cockle', emoji: '🐚', name: '새조개', category: '패류',
+    bans: [
+      { label: '부산·울산·경남·전남·제주', regions: ['남해', '제주'], ban: { from: [6, 1], to: [9, 30] } },
+      { label: '그 외 지역',               regions: ['서해', '동해'], ban: { from: [6, 16], to: [9, 30] } },
+    ],
+  },
+  {
+    id: 'clam-hard', emoji: '🐚', name: '백합', category: '패류',
+    bans: [{ label: '전국', regions: ['전국'], ban: { from: [7, 1], to: [8, 20] } }],
+    minSize: '각장 5cm 미만',
+  },
+  {
+    // 소라: 전남·제주, 제주 추자면, 경북 울릉 별도
+    id: 'turban-shell', emoji: '🐚', name: '소라', category: '패류',
+    bans: [
+      { label: '전남·제주',   regions: ['전남', '제주'], ban: { from: [6, 1], to: [8, 31] } },
+      { label: '제주 추자면', regions: ['제주'],         ban: { from: [7, 1], to: [9, 30] } },
+      { label: '경북 울릉',   regions: ['경북'],         ban: { from: [6, 1], to: [9, 30] } },
+    ],
+    minSize: '각장 5cm 미만 (제주 7cm)',
+    notes: ['지역별 금어기 별도 적용 — 상세 내용은 시·도 공고 확인'],
   },
 ];
 
