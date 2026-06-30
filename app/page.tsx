@@ -9,9 +9,10 @@ import { TideStationInfo } from '@/components/TideInfoContent';
 import SelectionPanel, { PanelSelection } from '@/components/SelectionPanel';
 import FishingBan from '@/components/FishingBan';
 import FeedbackPage from '@/components/FeedbackPage';
-import MyPage from '@/components/MyPage';
+import MyPage, { Favorite } from '@/components/MyPage';
 import MorePage from '@/components/MorePage';
 import CctvLayer from '@/components/CctvLayer';
+import FavoritePickPanel from '@/components/FavoritePickPanel';
 import BottomNav, { AppTab } from '@/components/BottomNav';
 
 export default function Home() {
@@ -23,6 +24,8 @@ export default function Home() {
   const [showAqua, setShowAqua] = useState(true);
   const [showSetnet, setShowSetnet] = useState(true);
   const [cctvVisible, setCctvVisible] = useState(false);
+  const [pickMode, setPickMode] = useState(false);
+  const [pickedLocation, setPickedLocation] = useState<{ lat: number; lng: number } | null>(null);
   const mapRef = useRef<KakaoMapHandle>(null);
 
   const handleFarmSelect = useCallback((farm: FarmProperties | null) => {
@@ -43,6 +46,32 @@ export default function Home() {
     mapRef.current?.deselectPolygon();
   }, []);
 
+  const handleAddFavorite = useCallback(() => {
+    setActiveTab('map');
+    setPickMode(true);
+    setSelection(null);
+  }, []);
+
+  const handlePick = useCallback((lat: number, lng: number) => {
+    setPickedLocation({ lat, lng });
+  }, []);
+
+  const handlePickPanelClose = useCallback(() => {
+    setPickedLocation(null);
+    setPickMode(false);
+  }, []);
+
+  const handleFavoriteSaved = useCallback(() => {
+    setPickedLocation(null);
+    setPickMode(false);
+  }, []);
+
+  const handleViewFavorite = useCallback((favorite: Favorite) => {
+    setActiveTab('map');
+    setSelection(null);
+    requestAnimationFrame(() => mapRef.current?.panTo(favorite.lat, favorite.lng, 5));
+  }, []);
+
   return (
     <div className="flex flex-col h-dvh">
       <Header />
@@ -56,10 +85,20 @@ export default function Home() {
             showVillage={showVillage}
             showAqua={showAqua}
             showSetnet={showSetnet}
+            pickMode={pickMode}
+            onPick={handlePick}
+            pickedLocation={pickedLocation}
           />
           <TideLayer kakaoMap={kakaoMap} visible={tideVisible} onStationSelect={handleStationSelect} />
           <CctvLayer kakaoMap={kakaoMap} visible={cctvVisible} />
           <SearchBar mapRef={mapRef} />
+
+          {pickMode && (
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 bg-gray-900/90 text-white text-xs px-4 py-2 rounded-full whitespace-nowrap flex items-center gap-2">
+              지도를 눌러 관심 지역을 선택하세요
+              <button onClick={handlePickPanelClose} className="text-white/70 active:text-white">취소</button>
+            </div>
+          )}
 
           <button
             onClick={handleLocationClick}
@@ -74,6 +113,7 @@ export default function Home() {
           </button>
 
           <SelectionPanel selection={selection} onClose={handlePanelClose} />
+          <FavoritePickPanel location={pickedLocation} onClose={handlePickPanelClose} onSaved={handleFavoriteSaved} />
         </div>
 
         {/* 금지정보 탭 */}
@@ -93,7 +133,7 @@ export default function Home() {
         {/* 마이 탭 */}
         {activeTab === 'my' && (
           <div className="absolute inset-0">
-            <MyPage />
+            <MyPage onAddFavorite={handleAddFavorite} onViewFavorite={handleViewFavorite} />
           </div>
         )}
 
