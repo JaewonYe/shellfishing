@@ -11,10 +11,34 @@ interface User {
   createdAt: string;
 }
 
-export default function MyPage() {
+export interface Favorite {
+  id: number;
+  label: string;
+  lat: number;
+  lng: number;
+  created_at: string;
+}
+
+interface MyPageProps {
+  onAddFavorite?: () => void;
+  onViewFavorite?: (favorite: Favorite) => void;
+}
+
+export default function MyPage({ onAddFavorite, onViewFavorite }: MyPageProps = {}) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [favorites, setFavorites] = useState<Favorite[]>([]);
+  const [favoritesLoading, setFavoritesLoading] = useState(false);
+
+  const loadFavorites = useCallback(() => {
+    setFavoritesLoading(true);
+    fetch('/api/favorites')
+      .then(r => r.json())
+      .then(data => setFavorites(data.favorites ?? []))
+      .catch(() => setFavorites([]))
+      .finally(() => setFavoritesLoading(false));
+  }, []);
 
   useEffect(() => {
     let retries = 0;
@@ -42,6 +66,15 @@ export default function MyPage() {
         });
     };
     fetchUser();
+  }, []);
+
+  useEffect(() => {
+    if (user) loadFavorites();
+  }, [user, loadFavorites]);
+
+  const handleDeleteFavorite = useCallback(async (id: number) => {
+    setFavorites(prev => prev.filter(f => f.id !== id));
+    await fetch(`/api/favorites?id=${id}`, { method: 'DELETE' }).catch(() => {});
   }, []);
 
   const handleLogin = useCallback(() => {
@@ -116,10 +149,57 @@ export default function MyPage() {
               </button>
             )}
 
-            {/* 활동 요약 */}
+            {/* 관심 지역 */}
             <section className="bg-white rounded-2xl p-5 shadow-sm">
-              <h3 className="text-sm font-bold text-gray-800 mb-3">내 활동</h3>
-              <p className="text-sm text-gray-400">아직 활동 내역이 없습니다.</p>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-bold text-gray-800">관심 지역</h3>
+                <button
+                  onClick={onAddFavorite}
+                  className="text-xs font-semibold text-ocean-mid active:opacity-60 flex items-center gap-1"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 5v14M5 12h14"/>
+                  </svg>
+                  지도에서 추가
+                </button>
+              </div>
+
+              {favoritesLoading ? (
+                <p className="text-sm text-gray-400">불러오는 중...</p>
+              ) : favorites.length === 0 ? (
+                <p className="text-sm text-gray-400">
+                  등록된 관심 지역이 없습니다. 지도에서 위치를 선택해 등록해보세요.
+                </p>
+              ) : (
+                <ul className="space-y-2">
+                  {favorites.map(fav => (
+                    <li
+                      key={fav.id}
+                      className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-gray-50"
+                    >
+                      <button
+                        onClick={() => onViewFavorite?.(fav)}
+                        className="flex-1 text-left flex items-center gap-2 min-w-0"
+                      >
+                        <svg className="w-4 h-4 text-ocean-mid shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0118 0z"/>
+                          <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        <span className="text-sm text-gray-700 truncate">{fav.label}</span>
+                      </button>
+                      <button
+                        onClick={() => handleDeleteFavorite(fav.id)}
+                        className="text-gray-300 active:text-red-500 shrink-0"
+                        aria-label="삭제"
+                      >
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M6 6l12 12M18 6l-12 12"/>
+                        </svg>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </section>
 
             {/* 로그아웃 */}

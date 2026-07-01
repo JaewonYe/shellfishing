@@ -74,6 +74,9 @@ interface KakaoMapProps {
   showVillage?: boolean;
   showAqua?: boolean;
   showSetnet?: boolean;
+  pickMode?: boolean;
+  onPick?: (lat: number, lng: number) => void;
+  pickedLocation?: { lat: number; lng: number } | null;
 }
 
 // kakao SDK global 타입 선언 (panTo·검색·위치이동 등 services 호출에 필요)
@@ -260,12 +263,16 @@ function addBbox(features: any[]): any[] {
 
 // ── 컴포넌트 ──────────────────────────────────────
 const KakaoMap = forwardRef<KakaoMapHandle, KakaoMapProps>(function KakaoMap(
-  { onFarmSelect, onMapReady, showVillage = true, showAqua = true, showSetnet = true },
+  { onFarmSelect, onMapReady, showVillage = true, showAqua = true, showSetnet = true, pickMode = false, onPick, pickedLocation = null },
   ref,
 ) {
   useKakaoLoader({ appkey: KAKAO_KEY, libraries: ['services'] });
 
   const [map, setMap] = useState<any>(null);
+  const pickModeRef = useRef(pickMode);
+  const onPickRef = useRef(onPick);
+  useEffect(() => { pickModeRef.current = pickMode; }, [pickMode]);
+  useEffect(() => { onPickRef.current = onPick; }, [onPick]);
 
   const villageRef      = useRef<any[]>([]);
   const aquaRef         = useRef<any[]>([]);
@@ -414,8 +421,13 @@ const KakaoMap = forwardRef<KakaoMapHandle, KakaoMapProps>(function KakaoMap(
     idleTimerRef.current = setTimeout(renderVisible, 400);
   }, [renderVisible]);
 
-  // 지도 클릭 → 선택 해제
-  const handleMapClick = useCallback(() => {
+  // 지도 클릭 → 선택 해제 (관심 지역 등록 모드에서는 위치 지정)
+  const handleMapClick = useCallback((_target: any, mouseEvent: any) => {
+    if (pickModeRef.current) {
+      const latlng = mouseEvent?.latLng;
+      if (latlng) onPickRef.current?.(latlng.getLat(), latlng.getLng());
+      return;
+    }
     setSelectedId(null);
     onSelectRef.current(null);
   }, []);
@@ -531,7 +543,7 @@ const KakaoMap = forwardRef<KakaoMapHandle, KakaoMapProps>(function KakaoMap(
       <KakaoMapView
         center={MAP_CENTER}
         level={MAP_LEVEL}
-        className="w-full h-full"
+        className={`w-full h-full ${pickMode ? 'cursor-crosshair' : ''}`}
         onCreate={handleMapCreate}
         onClick={handleMapClick}
         onIdle={handleIdle}
@@ -579,6 +591,9 @@ const KakaoMap = forwardRef<KakaoMapHandle, KakaoMapProps>(function KakaoMap(
 
         {/* 현재 위치 마커 */}
         {myLocation && <MapMarker position={myLocation} title="내 위치" />}
+
+        {/* 관심 지역 등록 모드 - 선택 위치 마커 */}
+        {pickedLocation && <MapMarker position={pickedLocation} title="선택한 위치" />}
       </KakaoMapView>
 
       {/* 토스트 */}
