@@ -35,7 +35,11 @@ function saveLocal(items: FeedbackItem[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
 }
 
-export default function FeedbackPage() {
+interface FeedbackPageProps {
+  onBack?: () => void;
+}
+
+export default function FeedbackPage({ onBack }: FeedbackPageProps = {}) {
   const [items, setItems] = useState<FeedbackItem[]>([]);
   const [category, setCategory] = useState('feature');
   const [content, setContent] = useState('');
@@ -157,6 +161,18 @@ export default function FeedbackPage() {
   return (
     <div className="absolute inset-0 bg-gray-50 overflow-y-auto">
       <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
+
+        {/* 헤더 */}
+        {onBack && (
+          <div className="flex items-center gap-3">
+            <button onClick={onBack} className="text-gray-400 active:text-gray-600" aria-label="뒤로">
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 12H5M12 5l-7 7 7 7"/>
+              </svg>
+            </button>
+            <h2 className="text-base font-bold text-gray-800">개선 요청</h2>
+          </div>
+        )}
 
         {/* 작성 폼 */}
         <section className="bg-white rounded-2xl p-5 shadow-sm">
