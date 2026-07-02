@@ -9,7 +9,6 @@ import { TideStationInfo } from '@/components/TideInfoContent';
 import SelectionPanel, { PanelSelection } from '@/components/SelectionPanel';
 import FishingBan from '@/components/FishingBan';
 import MyPage, { Favorite } from '@/components/MyPage';
-import MorePage from '@/components/MorePage';
 import CctvLayer from '@/components/CctvLayer';
 import FavoritePickPanel from '@/components/FavoritePickPanel';
 import BottomNav, { AppTab } from '@/components/BottomNav';
@@ -125,24 +124,21 @@ export default function Home() {
         {/* 마이 탭 */}
         {activeTab === 'my' && (
           <div className="absolute inset-0">
-            <MyPage onAddFavorite={handleAddFavorite} onViewFavorite={handleViewFavorite} />
+            <MyPage
+              onAddFavorite={handleAddFavorite}
+              onViewFavorite={handleViewFavorite}
+              showVillage={showVillage}
+              onVillageToggle={() => setShowVillage(v => !v)}
+              showAqua={showAqua}
+              onAquaToggle={() => setShowAqua(v => !v)}
+              showSetnet={showSetnet}
+              onSetnetToggle={() => setShowSetnet(v => !v)}
+              tideVisible={tideVisible}
+              onTideToggle={() => setTideVisible(v => !v)}
+              cctvVisible={cctvVisible}
+              onCctvToggle={() => setCctvVisible(v => !v)}
+            />
           </div>
-        )}
-
-        {/* 기타 탭 */}
-        {activeTab === 'more' && (
-          <MorePage
-            showVillage={showVillage}
-            onVillageToggle={() => setShowVillage(v => !v)}
-            showAqua={showAqua}
-            onAquaToggle={() => setShowAqua(v => !v)}
-            showSetnet={showSetnet}
-            onSetnetToggle={() => setShowSetnet(v => !v)}
-            tideVisible={tideVisible}
-            onTideToggle={() => setTideVisible(v => !v)}
-            cctvVisible={cctvVisible}
-            onCctvToggle={() => setCctvVisible(v => !v)}
-          />
         )}
       </div>
 
