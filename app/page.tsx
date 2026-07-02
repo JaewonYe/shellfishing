@@ -8,7 +8,8 @@ import TideLayer from '@/components/TideLayer';
 import { TideStationInfo } from '@/components/TideInfoContent';
 import SelectionPanel, { PanelSelection } from '@/components/SelectionPanel';
 import FishingBan from '@/components/FishingBan';
-import MyPage, { Favorite } from '@/components/MyPage';
+import MyPage from '@/components/MyPage';
+import FavoritesPage, { Favorite } from '@/components/FavoritesPage';
 import CctvLayer from '@/components/CctvLayer';
 import FavoritePickPanel from '@/components/FavoritePickPanel';
 import BottomNav, { AppTab } from '@/components/BottomNav';
@@ -70,6 +71,10 @@ export default function Home() {
     requestAnimationFrame(() => mapRef.current?.panTo(favorite.lat, favorite.lng, 5));
   }, []);
 
+  const handleFavoriteTabAfterSave = useCallback(() => {
+    setActiveTab('favorite');
+  }, []);
+
   return (
     <div className="flex flex-col h-dvh">
       <Header />
@@ -111,7 +116,7 @@ export default function Home() {
           </button>
 
           <SelectionPanel selection={selection} onClose={handlePanelClose} />
-          <FavoritePickPanel location={pickedLocation} onClose={handlePickPanelClose} onSaved={handleFavoriteSaved} />
+          <FavoritePickPanel location={pickedLocation} onClose={handlePickPanelClose} onSaved={() => { handleFavoriteSaved(); handleFavoriteTabAfterSave(); }} />
         </div>
 
         {/* 금지정보 탭 */}
@@ -121,12 +126,17 @@ export default function Home() {
           </div>
         )}
 
-        {/* 마이 탭 */}
+        {/* 관심정보 탭 */}
+        {activeTab === 'favorite' && (
+          <div className="absolute inset-0">
+            <FavoritesPage onAddFavorite={handleAddFavorite} onViewFavorite={handleViewFavorite} />
+          </div>
+        )}
+
+        {/* 더보기 탭 */}
         {activeTab === 'my' && (
           <div className="absolute inset-0">
             <MyPage
-              onAddFavorite={handleAddFavorite}
-              onViewFavorite={handleViewFavorite}
               showVillage={showVillage}
               onVillageToggle={() => setShowVillage(v => !v)}
               showAqua={showAqua}

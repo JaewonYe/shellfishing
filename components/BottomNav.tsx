@@ -1,6 +1,6 @@
 'use client';
 
-export type AppTab = 'map' | 'ban' | 'my';
+export type AppTab = 'map' | 'ban' | 'favorite' | 'my';
 
 interface BottomNavProps {
   active: AppTab;
@@ -29,6 +29,16 @@ const TABS: { key: AppTab; label: string; icon: React.ReactNode }[] = [
         <path d="M6.5 17.5 Q9 15 12 15 Q15 15 17.5 17.5"/>
         <ellipse cx="12" cy="12" rx="3" ry="6"/>
         <line x1="4" y1="4" x2="20" y2="20" strokeDasharray="3 2"/>
+      </svg>
+    ),
+  },
+  {
+    key: 'favorite',
+    label: '관심정보',
+    icon: (
+      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0118 0z"/>
+        <circle cx="12" cy="10" r="3"/>
       </svg>
     ),
   },
