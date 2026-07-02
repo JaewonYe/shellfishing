@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import AdminPage from './AdminPage';
+import FeedbackPage from './FeedbackPage';
 
 interface User {
   id: number;
@@ -45,6 +46,7 @@ export default function MyPage({ onAddFavorite, onViewFavorite }: MyPageProps = 
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [favoritesLoading, setFavoritesLoading] = useState(false);
   const [expandedId, setExpandedId] = useState<number | null>(null);
@@ -186,6 +188,10 @@ export default function MyPage({ onAddFavorite, onViewFavorite }: MyPageProps = 
     return <AdminPage onBack={() => setShowAdmin(false)} />;
   }
 
+  if (showFeedback) {
+    return <FeedbackPage onBack={() => setShowFeedback(false)} />;
+  }
+
   return (
     <div className="absolute inset-0 bg-gray-50 overflow-y-auto">
       <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
@@ -236,6 +242,19 @@ export default function MyPage({ onAddFavorite, onViewFavorite }: MyPageProps = 
                 관리자 페이지
               </button>
             )}
+
+            {/* 개선 요청 */}
+            <button
+              onClick={() => setShowFeedback(true)}
+              className="w-full py-3 rounded-xl bg-white border border-gray-200 text-gray-700 font-semibold text-sm active:bg-gray-50 transition-colors flex items-center justify-center gap-2 shadow-sm"
+            >
+              <svg className="w-5 h-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                <line x1="9" y1="9" x2="15" y2="9"/>
+                <line x1="9" y1="13" x2="13" y2="13"/>
+              </svg>
+              개선 요청
+            </button>
 
             {/* 관심 지역 */}
             <section className="bg-white rounded-2xl p-5 shadow-sm">
@@ -358,6 +377,18 @@ export default function MyPage({ onAddFavorite, onViewFavorite }: MyPageProps = 
             </button>
           </>
         ) : (
+          <>
+          <button
+            onClick={() => setShowFeedback(true)}
+            className="w-full py-3 rounded-xl bg-white border border-gray-200 text-gray-700 font-semibold text-sm active:bg-gray-50 transition-colors flex items-center justify-center gap-2 shadow-sm"
+          >
+            <svg className="w-5 h-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+              <line x1="9" y1="9" x2="15" y2="9"/>
+              <line x1="9" y1="13" x2="13" y2="13"/>
+            </svg>
+            개선 요청
+          </button>
           <section className="bg-white rounded-2xl p-5 shadow-sm text-center">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-ocean-pale flex items-center justify-center">
               <svg className="w-8 h-8 text-ocean-mid" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -380,6 +411,7 @@ export default function MyPage({ onAddFavorite, onViewFavorite }: MyPageProps = 
               카카오 로그인
             </button>
           </section>
+          </>
         )}
 
       </div>

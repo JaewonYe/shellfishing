@@ -8,7 +8,6 @@ import TideLayer from '@/components/TideLayer';
 import { TideStationInfo } from '@/components/TideInfoContent';
 import SelectionPanel, { PanelSelection } from '@/components/SelectionPanel';
 import FishingBan from '@/components/FishingBan';
-import FeedbackPage from '@/components/FeedbackPage';
 import MyPage, { Favorite } from '@/components/MyPage';
 import MorePage from '@/components/MorePage';
 import CctvLayer from '@/components/CctvLayer';
@@ -120,13 +119,6 @@ export default function Home() {
         {activeTab === 'ban' && (
           <div className="absolute inset-0">
             <FishingBan />
-          </div>
-        )}
-
-        {/* 개선요청 탭 */}
-        {activeTab === 'feedback' && (
-          <div className="absolute inset-0">
-            <FeedbackPage />
           </div>
         )}
 
